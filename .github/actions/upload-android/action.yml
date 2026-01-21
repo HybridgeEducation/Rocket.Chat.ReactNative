@@ -77,9 +77,9 @@ runs:
         BUILD_VERSION: ${{ inputs.BUILD_VERSION }}
       run: |
         if [[ "$BUILD_TYPE" == "official" ]]; then
-          app_name="Rocket.Chat"
+          app_name="Hybridge Chat"
         else
-          app_name="Rocket.Chat Experimental"
+          app_name="Hybridge Chat"
         fi
 
         gradle_file="android/app/build.gradle"

@@ -149,9 +149,9 @@ runs:
         BUILD_TYPE: ${{ inputs.type }}
       run: |
         if [[ "$BUILD_TYPE" == "official" ]]; then
-          app_name="Rocket.Chat"
+          app_name="Hybridge Chat"
         else
-          app_name="Rocket.Chat Experimental"
+          app_name="Hybridge Chat"
         fi
 
         message="**iOS Build Available**"$'\n\n'"$app_name $VERSION_NAME.$BUILD_VERSION"
