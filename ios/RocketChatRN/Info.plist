@@ -108,5 +108,9 @@
 		<key>apiKey</key>
 		<string>5113e0803ba5f30d871df72e75e3c4d9</string>
 	</dict>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>INSendMessageIntent</string>
+	</array>
 </dict>
 </plist>
