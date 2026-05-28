@@ -1,3 +1,8 @@
 {
-	"name": "RocketChatRN"
+ "name": "RocketChatRN",
+ "share": "ShareRocketChatRN",
+ "displayName": "RocketChatRN",
+ "server": "https://chat.hybridge.education",
+ "appGroup": "group.ios.chat.hybridge",
+ "appStoreID": "id1616914004"
 }

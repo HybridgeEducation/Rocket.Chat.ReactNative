@@ -1,77 +1,41 @@
 {
   "project_info": {
-    "project_number": "115198584049",
-    "firebase_url": "https://rocketchat-reactnative-test.firebaseio.com",
-    "project_id": "rocketchat-reactnative-test",
-    "storage_bucket": "rocketchat-reactnative-test.appspot.com"
+    "project_number": "900321453303",
+    "firebase_url": "https://hybridge-d36f2-default-rtdb.firebaseio.com",
+    "project_id": "hybridge-d36f2",
+    "storage_bucket": "hybridge-d36f2.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:115198584049:android:a79216ae48935d2c9ab550",
+        "mobilesdk_app_id": "1:900321453303:android:4dceb3775a6fdb2ab55ff2",
         "android_client_info": {
-          "package_name": "chat.rocket.android"
+          "package_name": "chat.rocket.hybridge"
         }
       },
       "oauth_client": [
         {
-          "client_id": "115198584049-ack609b1338b827fta26s9rd2ab1aad5.apps.googleusercontent.com",
+          "client_id": "900321453303-rika11jnm813tb2ndsnj4au4npjf7h7e.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAWwowhAfACHBw3YxmDOXY3QyakgjhJLqc"
+          "current_key": "AIzaSyBT1kMA7TPu8AO9nFEZvw7Ym2ccxdMDZzw"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "115198584049-ack609b1338b827fta26s9rd2ab1aad5.apps.googleusercontent.com",
+              "client_id": "900321453303-rika11jnm813tb2ndsnj4au4npjf7h7e.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "115198584049-0efgfvm0oh9ap55g7epmqnjm27mq3j4e.apps.googleusercontent.com",
+              "client_id": "900321453303-n5khbg4q8m8nvug54n4qmn2fh6r2kl44.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "chat.rocket.reactnative"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:115198584049:android:8be27b1f7c42a2ed",
-        "android_client_info": {
-          "package_name": "chat.rocket.reactnative"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "115198584049-ack609b1338b827fta26s9rd2ab1aad5.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAWwowhAfACHBw3YxmDOXY3QyakgjhJLqc"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "115198584049-ack609b1338b827fta26s9rd2ab1aad5.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "115198584049-0efgfvm0oh9ap55g7epmqnjm27mq3j4e.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "chat.rocket.reactnative"
+                "bundle_id": "mx.nextia.hybridge"
               }
             }
           ]
