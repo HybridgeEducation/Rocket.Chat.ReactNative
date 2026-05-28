@@ -121,7 +121,6 @@
 		1ED038C62B50A21800C007D4 /* WatchMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ED038C32B50A1F500C007D4 /* WatchMessage.swift */; };
 		1ED038CA2B50A58400C007D4 /* ServersLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ED038C92B50A58400C007D4 /* ServersLoader.swift */; };
 		1ED1EC892B867E2400F6620C /* ExtensionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ED1EC882B867E2400F6620C /* ExtensionDelegate.swift */; };
-		1ED1ECE42B8699E900F6620C /* Rocket.Chat Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 1ED0388E2B507B4B00C007D4 /* Rocket.Chat Watch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		1ED1ECEA2B869A4A00F6620C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7A14FCF3257FEB59005BDCD4 /* Assets.xcassets */; };
 		1EDB30F22B5B453A00532C7E /* LoggedInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDB30F12B5B453A00532C7E /* LoggedInView.swift */; };
 		1EDFD0FA2B589B8F002FEE5F /* MessagesLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDFD0F92B589B8F002FEE5F /* MessagesLoader.swift */; };
@@ -223,13 +222,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		1ED1ECE52B8699E900F6620C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 1ED0388D2B507B4B00C007D4;
-			remoteInfo = Rocket.Chat.Watch;
-		};
 		7AAB3E0F257E6A6E00707CF6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
@@ -247,17 +239,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		1ED1ECE32B8699DD00F6620C /* Embed Watch Content */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
-			dstSubfolderSpec = 16;
-			files = (
-				1ED1ECE42B8699E900F6620C /* Rocket.Chat Watch.app in Embed Watch Content */,
-			);
-			name = "Embed Watch Content";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		7AAB3E48257E6A6E00707CF6 /* Embed App Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1122,7 +1103,6 @@
 				7A55BE3B2F11316900D8744D /* Bundle React Native code and images */,
 				7AAB3E48257E6A6E00707CF6 /* Embed App Extensions */,
 				7A55BE3C2F1131C000D8744D /* ShellScript */,
-				1ED1ECE32B8699DD00F6620C /* Embed Watch Content */,
 				7A55BE3D2F11320C00D8744D /* Upload source maps to Bugsnag */,
 				F8FA5EB1C05179679A1B0213 /* [CP] Embed Pods Frameworks */,
 				6C507C5DC028E270B40EF89D /* [CP] Copy Pods Resources */,
@@ -1132,7 +1112,6 @@
 			dependencies = (
 				7AAB3E0E257E6A6E00707CF6 /* PBXTargetDependency */,
 				7AAB3E10257E6A6E00707CF6 /* PBXTargetDependency */,
-				1ED1ECE62B8699E900F6620C /* PBXTargetDependency */,
 			);
 			name = Rocket.Chat;
 			productName = "Hello World";
@@ -1384,7 +1363,7 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"$TARGET_BUILD_DIR/$INFOPLIST_PATH",
+				$TARGET_BUILD_DIR/$INFOPLIST_PATH,
 			);
 			name = "Upload source maps to Bugsnag";
 			outputFileListPaths = (
@@ -1773,11 +1752,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		1ED1ECE62B8699E900F6620C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 1ED0388D2B507B4B00C007D4 /* Rocket.Chat.Watch */;
-			targetProxy = 1ED1ECE52B8699E900F6620C /* PBXContainerItemProxy */;
-		};
 		7AAB3E0E257E6A6E00707CF6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 1EC6ACAF22CB9FC300A41C61 /* ShareRocketChatRN */;
@@ -1842,11 +1816,15 @@
 				);
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"FMT_USE_CONSTEVAL=0",
+				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/rn-extensions-share/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
-					"$PODS_CONFIGURATION_BUILD_DIR/Firebase",
+					$PODS_CONFIGURATION_BUILD_DIR/Firebase,
 				);
 				INFOPLIST_FILE = ShareRocketChatRN/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
@@ -1866,6 +1844,10 @@
 				OTHER_CFLAGS = (
 					"$(inherited)",
 					"-DFB_SONARKIT_ENABLED=1",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(inherited)",
+					"-DFMT_USE_CONSTEVAL=0",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = "chat.rocket.ios.Rocket-Chat-ShareExtension";
@@ -1918,11 +1900,15 @@
 				);
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"FMT_USE_CONSTEVAL=0",
+				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/rn-extensions-share/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
-					"$PODS_CONFIGURATION_BUILD_DIR/Firebase",
+					$PODS_CONFIGURATION_BUILD_DIR/Firebase,
 				);
 				INFOPLIST_FILE = ShareRocketChatRN/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
@@ -1941,6 +1927,10 @@
 				OTHER_CFLAGS = (
 					"$(inherited)",
 					"-DFB_SONARKIT_ENABLED=1",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(inherited)",
+					"-DFMT_USE_CONSTEVAL=0",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = "chat.rocket.ios.Rocket-Chat-ShareExtension";
@@ -1975,6 +1965,10 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"FMT_USE_CONSTEVAL=0",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Rocket.Chat;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -1987,6 +1981,10 @@
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(inherited)",
+					"-DFMT_USE_CONSTEVAL=0",
+				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = chat.rocket.ios.watchkitapp;
 				PRODUCT_NAME = "Rocket.Chat Watch";
@@ -2028,6 +2026,10 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"FMT_USE_CONSTEVAL=0",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Rocket.Chat;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -2039,6 +2041,10 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.0;
 				MTL_FAST_MATH = YES;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(inherited)",
+					"-DFMT_USE_CONSTEVAL=0",
+				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = chat.rocket.ios.watchkitapp;
 				PRODUCT_NAME = "Rocket.Chat Watch";
@@ -2077,6 +2083,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"FORCE_POSIX=1",
+					"FMT_USE_CONSTEVAL=0",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2092,6 +2099,10 @@
 				MARKETING_VERSION = 4.73.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(inherited)",
+					"-DFMT_USE_CONSTEVAL=0",
+				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = chat.rocket.ios.NotificationService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2130,6 +2141,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"FORCE_POSIX=1",
+					"FMT_USE_CONSTEVAL=0",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2144,6 +2156,10 @@
 				);
 				MARKETING_VERSION = 4.73.0;
 				MTL_FAST_MATH = YES;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(inherited)",
+					"-DFMT_USE_CONSTEVAL=0",
+				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = chat.rocket.ios.NotificationService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2181,6 +2197,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"FORCE_POSIX=1",
+					"FMT_USE_CONSTEVAL=0",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2202,6 +2219,10 @@
 				OTHER_CFLAGS = (
 					"$(inherited)",
 					"-DFB_SONARKIT_ENABLED=1",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(inherited)",
+					"-DFMT_USE_CONSTEVAL=0",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -2245,6 +2266,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"FORCE_POSIX=1",
+					"FMT_USE_CONSTEVAL=0",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2266,6 +2288,10 @@
 				OTHER_CFLAGS = (
 					"$(inherited)",
 					"-DFB_SONARKIT_ENABLED=1",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(inherited)",
+					"-DFMT_USE_CONSTEVAL=0",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
