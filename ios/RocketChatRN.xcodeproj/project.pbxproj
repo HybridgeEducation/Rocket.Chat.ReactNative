@@ -424,7 +424,7 @@
 		7A8B30742BCD9D3F00146A40 /* SSLPinning.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSLPinning.h; sourceTree = "<group>"; };
 		7A8B30752BCD9D3F00146A40 /* SSLPinning.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SSLPinning.mm; sourceTree = "<group>"; };
 		7AAA749C23043B1D00F1ADE9 /* RocketChatRN-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RocketChatRN-Bridging-Header.h"; sourceTree = "<group>"; };
-		7AAB3E52257E6A6E00707CF6 /* Rocket.Chat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rocket.Chat.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7AAB3E52257E6A6E00707CF6 /* Hybridge Chat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Hybridge Chat.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7AACF8A72C94AB8B0082844E /* EncryptedContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptedContent.swift; sourceTree = "<group>"; };
 		7AACF8AB2C94B28B0082844E /* DecryptedContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecryptedContent.swift; sourceTree = "<group>"; };
 		7AC0A1E02C000001001CAA11 /* Challenge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Challenge.h; sourceTree = "<group>"; };
@@ -972,7 +972,7 @@
 			children = (
 				1EC6ACB022CB9FC300A41C61 /* ShareRocketChatRN.appex */,
 				1EFEB5952493B6640072EDC0 /* NotificationService.appex */,
-				7AAB3E52257E6A6E00707CF6 /* Rocket.Chat.app */,
+				7AAB3E52257E6A6E00707CF6 /* Hybridge Chat.app */,
 				1ED0388E2B507B4B00C007D4 /* Rocket.Chat Watch.app */,
 			);
 			name = Products;
@@ -1115,7 +1115,7 @@
 			);
 			name = Rocket.Chat;
 			productName = "Hello World";
-			productReference = 7AAB3E52257E6A6E00707CF6 /* Rocket.Chat.app */;
+			productReference = 7AAB3E52257E6A6E00707CF6 /* Hybridge Chat.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -2205,6 +2205,7 @@
 					"$(SRCROOT)/../node_modules/react-native-mmkv/MMKV/Core/**",
 				);
 				INFOPLIST_FILE = RocketChatRN/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Hybridge Chat";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2230,7 +2231,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = mx.nextia.hybridge;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Hybridge Chat";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "RocketChatRN-Bridging-Header.h";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "RocketChatRN-Swift.h";
@@ -2274,6 +2275,7 @@
 					"$(SRCROOT)/../node_modules/react-native-mmkv/MMKV/Core/**",
 				);
 				INFOPLIST_FILE = RocketChatRN/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Hybridge Chat";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2299,7 +2301,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = mx.nextia.hybridge;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Hybridge Chat";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "RocketChatRN-Bridging-Header.h";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "RocketChatRN-Swift.h";
