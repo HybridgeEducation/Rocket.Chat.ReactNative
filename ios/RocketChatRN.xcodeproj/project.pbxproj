@@ -2095,7 +2095,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 4.73.0;
+				MARKETING_VERSION = 4.74.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				OTHER_CPLUSPLUSFLAGS = (
@@ -2153,7 +2153,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 4.73.0;
+				MARKETING_VERSION = 4.74.0;
 				MTL_FAST_MATH = YES;
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(inherited)",
