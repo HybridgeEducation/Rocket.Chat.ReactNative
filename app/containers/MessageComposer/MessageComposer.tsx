@@ -1,11 +1,12 @@
 import { type ReactElement, type Ref, useRef, useImperativeHandle } from 'react';
 import { AccessibilityInfo, findNodeHandle, type LayoutChangeEvent } from 'react-native';
 import { useBackHandler } from '@react-native-community/hooks';
+import { useIsFocused } from '@react-navigation/native';
 import { Q } from '@nozbe/watermelondb';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
-import { useRoomContext } from '../../views/RoomView/context';
-import { useMessageAction } from '../message/stores/MessageActionStore';
+import { useComposerRid, useComposerSharing, useComposerStoreApi, useComposerTmid } from './ComposerStore';
+import { useMessageActionKind, useMessageActionStoreApi } from '../message/stores/MessageActionStore';
 import { Autocomplete } from './components';
 import { MIN_HEIGHT } from './constants';
 import {
@@ -17,23 +18,23 @@ import {
 } from './context';
 import { type IComposerInput, type IMessageComposerRef } from './interfaces';
 import { EventTypes } from '../EmojiPicker/interfaces';
-import { type IEmoji } from '../../definitions';
-import database from '../../lib/database';
-import { sanitizeLikeString } from '../../lib/database/utils';
-import { generateTriggerId } from '../../lib/methods/actions';
-import { runSlashCommand } from '../../lib/services/restApi';
-import log from '../../lib/methods/helpers/log';
-import { prepareQuoteMessage, insertEmojiAtCursor } from './helpers';
-import useShortnameToUnicode from '../../lib/hooks/useShortnameToUnicode';
+import { type IEmoji } from '~/definitions';
+import database from '~/lib/database';
+import { sanitizeLikeString } from '~/lib/database/utils';
+import { withTriggerId } from '~/lib/apps/actions';
+import { runSlashCommand } from '~/lib/services/restApi';
+import log from '~/lib/methods/helpers/log';
+import { prepareQuoteMessage, insertEmojiAtCursor, lastGlyphLength } from './helpers';
+import useShortnameToUnicode from '~/lib/hooks/useShortnameToUnicode';
 import { useCloseKeyboardWhenOrientationChanges } from './hooks/useCloseKeyboardWhenOrientationChanges';
 import { useEmojiKeyboard } from './hooks/useEmojiKeyboard';
 import EmojiPicker from '../EmojiPicker';
 import { MessageComposerContent } from './components/MessageComposerContent';
-import { useTheme } from '../../theme';
-import { useAppSelector } from '../../lib/hooks/useAppSelector';
-import { getUserSelector } from '../../selectors/login';
-import { sendAttachments } from '../../lib/methods/sendFileMessage/sendAttachments';
-import { useAltTextSupported } from '../../lib/hooks/useAltTextSupported';
+import { useTheme } from '~/theme';
+import { useAppSelector } from '~/lib/hooks/useAppSelector';
+import { getUserSelector } from '~/selectors/login';
+import { sendAttachments } from '~/lib/methods/sendFileMessage/sendAttachments';
+import { useAltTextSupported } from '~/lib/hooks/useAltTextSupported';
 
 export const MessageComposer = ({
 	forwardedRef,
@@ -53,8 +54,12 @@ export const MessageComposer = ({
 	});
 	const contentHeight = useSharedValue(MIN_HEIGHT);
 	useCloseKeyboardWhenOrientationChanges();
-	const { rid, tmid, sharing, editRequest, onSendMessage, setQuotesAndText } = useRoomContext();
-	const action = useMessageAction();
+	const rid = useComposerRid();
+	const tmid = useComposerTmid();
+	const sharing = useComposerSharing();
+	const composerStore = useComposerStoreApi();
+	const messageActionStore = useMessageActionStoreApi();
+	const actionKind = useMessageActionKind();
 	const alsoSendThreadToChannel = useAlsoSendThreadToChannel();
 	const { showEmojiKeyboard, showEmojiSearchbar, openEmojiSearchbar, resetKeyboard, keyboardHeight } = useEmojiKeyboard();
 	const { setAlsoSendThreadToChannel, setAutocompleteParams, clearAttachments } = useMessageComposerApi();
@@ -66,17 +71,19 @@ export const MessageComposer = ({
 	const altTextSupported = useAltTextSupported();
 	const attachments = useComposerAttachments();
 
+	const isFocused = useIsFocused();
+
 	useBackHandler(() => {
-		if (showEmojiSearchbar) {
+		if (isFocused && (showEmojiSearchbar || showEmojiKeyboard)) {
 			resetKeyboard();
 			return true;
 		}
 		return false;
 	});
 
-	const closeEmojiKeyboardAndAction = (action?: Function, params?: any) => {
+	const closeEmojiKeyboardAndAction = (onClosed?: Function, params?: any) => {
 		resetKeyboard();
-		action && action(params);
+		onClosed?.(params);
 	};
 
 	useImperativeHandle(forwardedRef, () => ({
@@ -88,11 +95,16 @@ export const MessageComposer = ({
 
 	const handleLayout = (event: LayoutChangeEvent) => {
 		const { height } = event.nativeEvent.layout;
-		contentHeight.value = height;
+		contentHeight.set(height);
 	};
 
 	const handleSendMessage = async () => {
 		if (!rid) return;
+
+		const { editRequest, onSendMessage } = composerStore.getState();
+		const { action } = messageActionStore.getState();
+		const editingMessageId = action?.kind === 'edit' ? action.messageId : undefined;
+		const quotedMessageIds = action?.kind === 'quote' ? action.messageIds : [];
 
 		if (alsoSendThreadToChannel) {
 			setAlsoSendThreadToChannel(false);
@@ -108,13 +120,13 @@ export const MessageComposer = ({
 
 		const textFromInput = composerInputComponentRef.current.getTextAndClear();
 
-		if (action?.kind === 'edit') {
+		if (editingMessageId) {
 			const updatedAttachments = attachments.length
 				? attachments.map(({ description, altText, fileId, filename }) =>
 						altTextSupported ? { description: altText || '', fileId, filename } : { description: description || '' }
 					)
 				: undefined;
-			editRequest?.({ id: action.messageId, msg: textFromInput, rid, attachments: updatedAttachments });
+			editRequest?.({ id: editingMessageId, msg: textFromInput, rid, attachments: updatedAttachments });
 			clearAttachments();
 			return;
 		}
@@ -122,8 +134,8 @@ export const MessageComposer = ({
 		if (attachments.length) {
 			let quotedMessage: string | undefined;
 
-			if (action?.kind === 'quote') {
-				quotedMessage = await prepareQuoteMessage(textFromInput, action.messageIds, tmid);
+			if (quotedMessageIds.length) {
+				quotedMessage = await prepareQuoteMessage(textFromInput, quotedMessageIds, tmid);
 			}
 
 			try {
@@ -136,18 +148,19 @@ export const MessageComposer = ({
 					altTextSupported,
 					getMsg: ({ description }, index) => (index === 0 ? description || quotedMessage || textFromInput : description)
 				});
-				clearAttachments();
-				setQuotesAndText?.('', []);
-				return;
 			} catch (e) {
 				log(e);
 				composerInputComponentRef.current.setInput(textFromInput);
 				return;
 			}
+			clearAttachments();
+			messageActionStore.getState().actions.setQuoteMessageIds([]);
+			composerInputComponentRef.current?.setInput('');
+			return;
 		}
 
-		if (action?.kind === 'quote') {
-			const quoteMessage = await prepareQuoteMessage(textFromInput, action.messageIds, tmid);
+		if (quotedMessageIds.length) {
+			const quoteMessage = await prepareQuoteMessage(textFromInput, quotedMessageIds, tmid);
 			onSendMessage?.(quoteMessage);
 			return;
 		}
@@ -163,8 +176,7 @@ export const MessageComposer = ({
 				try {
 					const messageWithoutCommand = textFromInput.replace(/([^\s]+)/, '').trim();
 					const [{ appId }] = slashCommand;
-					const triggerId = generateTriggerId(appId);
-					await runSlashCommand(command, rid, messageWithoutCommand, triggerId, tmid);
+					await withTriggerId(appId, triggerId => runSlashCommand(command, rid, messageWithoutCommand, triggerId, tmid));
 				} catch (e) {
 					log(e);
 				}
@@ -186,14 +198,10 @@ export const MessageComposer = ({
 
 		switch (eventType) {
 			case EventTypes.BACKSPACE_PRESSED:
-				const emojiRegex = /\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]/;
-				let charsToRemove = 1;
-				const lastEmoji = text.substr(cursor > 0 ? cursor - 2 : text.length - 2, cursor > 0 ? cursor : text.length);
-				// Check if last character is an emoji
-				if (emojiRegex.test(lastEmoji)) charsToRemove = 2;
-				newText =
-					text.substr(0, (cursor > 0 ? cursor : text.length) - charsToRemove) + text.substr(cursor > 0 ? cursor : text.length);
-				newCursor = cursor - charsToRemove;
+				const deleteAt = cursor > 0 ? cursor : text.length;
+				const charsToRemove = lastGlyphLength(text, deleteAt);
+				newText = text.substr(0, deleteAt - charsToRemove) + text.substr(deleteAt);
+				newCursor = deleteAt - charsToRemove;
 				composerInputComponentRef.current.setInput(newText, { start: newCursor, end: newCursor });
 				break;
 			case EventTypes.EMOJI_PRESSED:
@@ -218,7 +226,7 @@ export const MessageComposer = ({
 		onKeyboardItemSelected(EventTypes.EMOJI_PRESSED, emoji);
 	};
 
-	const focusComposerInput = () => composerInputComponentRef.current?.focus();
+	const focusComposerInput = (delay?: number) => composerInputComponentRef.current?.focus(delay);
 
 	const accessibilityFocusOnInput = () => {
 		const node = findNodeHandle(composerInputRef.current);
@@ -240,12 +248,14 @@ export const MessageComposer = ({
 			value={{
 				sendMessage: handleSendMessage,
 				onEmojiSelected,
+				getText: () => composerInputComponentRef.current?.getText(),
+				setInput: text => composerInputComponentRef.current?.setInput(text),
 				closeEmojiKeyboardAndAction,
 				focus: focusComposerInput
 			}}>
 			<MessageComposerContent
 				recordingAudio={recordingAudio}
-				action={action?.kind ?? null}
+				action={actionKind}
 				showEmojiSearchbar={showEmojiSearchbar}
 				composerInputComponentRef={composerInputComponentRef}
 				composerInputRef={composerInputRef}

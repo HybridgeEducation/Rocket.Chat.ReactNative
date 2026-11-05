@@ -3,24 +3,26 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 import type { ReactNode } from 'react';
 
-import { generateSnapshots } from '../../../.rnstorybook/generateSnapshots';
+import { generateSnapshots } from '~/.rnstorybook/generateSnapshots';
 import * as stories from './LoginServices.stories';
 import LoginServices from './index';
-import { createMockedStore } from '../../reducers/mockedStore';
-import { setLoginServices } from '../../actions/login';
-import { selectServerRequest } from '../../actions/server';
-import { type IServices } from '../../selectors/login';
+import { createMockedStore } from '~/reducers/mockedStore';
+import { setLoginServices } from '~/actions/login';
+import { selectServerRequest } from '~/actions/server';
+import { type IServices } from '~/selectors/login';
 import { type IItemService } from './interfaces';
 
-jest.mock('../../lib/services/connect', () => ({}));
+jest.mock('~/lib/services/connect', () => ({}));
 
 generateSnapshots(stories);
 
 jest.mock('./serviceLogin', () => ({}));
 
-jest.mock('react-native/Libraries/Linking/Linking', () => ({
-	openURL: jest.fn()
-}));
+jest.mock('react-native/Libraries/Linking/Linking', () => {
+	const linking = { openURL: jest.fn() };
+
+	return { ...linking, default: linking };
+});
 
 const SERVER = 'https://demo.rocket.chat';
 

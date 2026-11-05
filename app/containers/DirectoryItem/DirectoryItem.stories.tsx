@@ -1,7 +1,7 @@
 import { ScrollView } from 'react-native';
 
 import DirectoryItem from './index';
-import { themes } from '../../lib/constants/colors';
+import { themes } from '~/lib/constants/colors';
 
 const _theme = 'light';
 
@@ -83,5 +83,17 @@ export const CustomStyle = () => (
 		style={{ backgroundColor: '#e0e0e0' }}
 		onPress={onPress}
 		testID='directory-item-style'
+	/>
+);
+
+export const Disabled = () => (
+	<DirectoryItem
+		title='Encrypted room'
+		description='Waiting for encryption keys'
+		avatar='E'
+		type='p'
+		onPress={onPress}
+		disabledReason='Waiting for encryption keys'
+		testID='directory-item-disabled'
 	/>
 );

@@ -1,7 +1,7 @@
 import { createContext, type ReactElement, useContext, useState } from 'react';
 import { createStore, useStore } from 'zustand';
 
-import { type IEmoji, type IShareAttachment } from '../../definitions';
+import { type IEmoji, type IShareAttachment } from '~/definitions';
 import { type IAutocompleteBase, type TMicOrSend } from './interfaces';
 
 type TMessageComposerContextApi = {
@@ -84,15 +84,19 @@ export const useComposerAttachments = (): State['attachments'] => useComposerSto
 type TMessageInnerContext = {
 	sendMessage(): void;
 	onEmojiSelected(emoji: IEmoji): void;
-	// TODO: action should be required
-	closeEmojiKeyboardAndAction(action?: Function, params?: any): void;
-	focus(): void;
+	getText(): string | undefined;
+	setInput(text: string): void;
+	// TODO: onClosed should be required
+	closeEmojiKeyboardAndAction(onClosed?: Function, params?: any): void;
+	focus(delay?: number): void;
 };
 
 // TODO: rename
 export const MessageInnerContext = createContext<TMessageInnerContext>({
 	sendMessage: () => {},
 	onEmojiSelected: () => {},
+	getText: () => '',
+	setInput: () => {},
 	closeEmojiKeyboardAndAction: () => {},
 	focus: () => {}
 });

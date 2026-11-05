@@ -15,7 +15,14 @@
 		"experimentalDecorators": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
+		"paths": {
+			"~/*": ["./app/*"],
+			"~/app.json": ["./app.json"],
+			"~/scripts/*": ["./scripts/*"],
+			"~/.rnstorybook/*": ["./.rnstorybook/*"],
+			"~e2e/*": ["./e2e/*"]
+		}
 	},
 	"exclude": ["node_modules", "__mocks__", "**/.worktrees/**"]
 }

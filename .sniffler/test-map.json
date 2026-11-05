@@ -1,14 +1,18 @@
 [
 	{
-		"test": ".maestro/tests/accessibilityAndAppearance/ToastsAndDialogs.yml",
-		"dependsOn": ["app/views/StatusView/**"]
+		"test": "e2e/tests/accessibilityAndAppearance/toasts-and-dialogs.e2e.ts",
+		"dependsOn": ["app/views/AccessibilityAndAppearanceView/**", "app/views/StatusView/**", "app/views/SidebarView/**"]
 	},
 	{
-		"test": ".maestro/tests/assorted/accessibility-and-appearance.yaml",
+		"test": "e2e/tests/assorted/accessibility-and-appearance.e2e.ts",
 		"dependsOn": ["app/views/AccessibilityAndAppearanceView/**"]
 	},
 	{
-		"test": ".maestro/tests/assorted/broadcast.yaml",
+		"test": "e2e/tests/assorted/admin-panel.e2e.ts",
+		"dependsOn": ["app/views/AdminPanelView/**", "app/views/SidebarView/**"]
+	},
+	{
+		"test": "e2e/tests/assorted/broadcast.e2e.ts",
 		"dependsOn": [
 			"app/views/NewMessageView/**",
 			"app/views/SelectedUsersView/**",
@@ -18,22 +22,35 @@
 		]
 	},
 	{
-		"test": ".maestro/tests/assorted/change-avatar.yaml",
+		"test": "e2e/tests/assorted/channel-deeplink.e2e.ts",
+		"dependsOn": [
+			"app/views/RoomView/**",
+			"app/views/RoomsListView/**",
+			"app/sagas/deepLinking.js",
+			"app/sagas/room.js",
+			"app/sagas/login.js",
+			"app/sagas/rooms.js"
+		]
+	},
+	{
+		"test": "e2e/tests/assorted/change-avatar.e2e.ts",
 		"dependsOn": ["app/views/ChangeAvatarView/**", "app/views/ProfileView/**"]
 	},
 	{
-		"test": ".maestro/tests/assorted/changeserver.yaml",
+		"test": "e2e/tests/assorted/changeserver.e2e.ts",
 		"dependsOn": [
 			"app/views/NewServerView/**",
 			"app/views/WorkspaceView/**",
 			"app/views/RegisterView/**",
 			"app/views/RoomsListView/**",
 			"app/sagas/login.js",
-			"app/sagas/rooms.js"
+			"app/sagas/rooms.js",
+			"app/sagas/selectServer.ts",
+			"app/lib/services/connect.ts"
 		]
 	},
 	{
-		"test": ".maestro/tests/assorted/deeplink.yaml",
+		"test": "e2e/tests/assorted/deeplink.e2e.ts",
 		"dependsOn": [
 			"app/views/NewServerView/**",
 			"app/views/SelectServerView.tsx",
@@ -48,46 +65,67 @@
 		]
 	},
 	{
-		"test": ".maestro/tests/assorted/delete-server.yaml",
+		"test": "e2e/tests/assorted/delete-server.e2e.ts",
 		"dependsOn": [
 			"app/views/NewServerView/**",
 			"app/views/WorkspaceView/**",
 			"app/views/RegisterView/**",
 			"app/views/RoomsListView/**",
 			"app/sagas/login.js",
-			"app/sagas/rooms.js"
+			"app/sagas/rooms.js",
+			"app/sagas/selectServer.ts",
+			"app/lib/services/connect.ts"
 		]
 	},
 	{
-		"test": ".maestro/tests/assorted/display-perf.yaml",
+		"test": "e2e/tests/assorted/display-perf.e2e.ts",
 		"dependsOn": ["app/views/DisplayPrefsView.tsx", "app/views/RoomsListView/**", "app/sagas/rooms.js"]
 	},
 	{
-		"test": ".maestro/tests/assorted/i18n.yaml",
+		"test": "e2e/tests/assorted/i18n.e2e.ts",
 		"dependsOn": ["app/views/LanguageView/**"]
 	},
 	{
-		"test": ".maestro/tests/assorted/in-app-notification.yaml",
+		"test": "e2e/tests/assorted/in-app-notification.e2e.ts",
 		"dependsOn": ["app/views/RoomsListView/**", "app/containers/InAppNotification/**", "app/sagas/rooms.js"]
 	},
 	{
-		"test": ".maestro/tests/assorted/join-from-directory.yaml",
+		"test": "e2e/tests/assorted/join-from-directory.e2e.ts",
 		"dependsOn": ["app/views/DirectoryView/**"]
 	},
 	{
-		"test": ".maestro/tests/assorted/join-protected-room.yaml",
+		"test": "e2e/tests/assorted/join-protected-room.e2e.ts",
 		"dependsOn": ["app/views/RoomView/**", "app/sagas/room.js", "app/sagas/inviteLinks.js"]
 	},
 	{
-		"test": ".maestro/tests/assorted/join-public-room.yaml",
+		"test": "e2e/tests/assorted/join-public-room.e2e.ts",
 		"dependsOn": ["app/views/RoomActionsView/**", "app/views/RoomView/**", "app/sagas/room.js", "app/sagas/inviteLinks.js"]
 	},
 	{
-		"test": ".maestro/tests/assorted/profile.yaml",
+		"test": "e2e/tests/assorted/profile.e2e.ts",
 		"dependsOn": ["app/views/ProfileView/**", "app/views/ChangePasswordView/**"]
 	},
 	{
-		"test": ".maestro/tests/assorted/setting.yaml",
+		"test": "e2e/tests/assorted/screen-lock.e2e.ts",
+		"dependsOn": [
+			"app/views/ScreenLockConfigView.tsx",
+			"app/views/ScreenLockedView.tsx",
+			"app/views/ChangePasscodeView.tsx",
+			"app/views/SecurityPrivacyView.tsx",
+			"app/containers/Passcode/**",
+			"app/lib/hooks/useDeferredModalSettle.ts",
+			"app/lib/methods/helpers/localAuthentication.ts",
+			"app/lib/biometricTrustStore/**",
+			"app/lib/native/NativeBiometricEnrollment.ts",
+			"app/definitions/IBiometricTrustStore.ts",
+			"app/sagas/init.js",
+			"app/sagas/deepLinking.js",
+			"app/sagas/login.js",
+			"android/app/src/main/java/chat/rocket/reactnative/biometric/**"
+		]
+	},
+	{
+		"test": "e2e/tests/assorted/setting.e2e.ts",
 		"dependsOn": [
 			"app/views/SettingsView/**",
 			"app/views/LegalView.tsx",
@@ -97,11 +135,11 @@
 		]
 	},
 	{
-		"test": ".maestro/tests/assorted/status.yaml",
+		"test": "e2e/tests/assorted/status.e2e.ts",
 		"dependsOn": ["app/views/StatusView/**", "app/views/SidebarView/**"]
 	},
 	{
-		"test": ".maestro/tests/assorted/user-preferences.yaml",
+		"test": "e2e/tests/assorted/user-preferences.e2e.ts",
 		"dependsOn": [
 			"app/views/UserPreferencesView/**",
 			"app/views/UserNotificationPreferencesView/**",
@@ -110,7 +148,7 @@
 		]
 	},
 	{
-		"test": ".maestro/tests/e2ee/e2e-encryption.yaml",
+		"test": "e2e/tests/e2ee/e2e-encryption.e2e.ts",
 		"dependsOn": [
 			"app/views/E2EEncryptionSecurityView/**",
 			"app/views/E2EEnterYourPasswordView.tsx",
@@ -126,71 +164,95 @@
 		]
 	},
 	{
-		"test": ".maestro/tests/keyboardNavigation/keyboard-navigation-components.yaml",
+		"test": "e2e/tests/keyboardNavigation/keyboard-navigation-components.e2e.ts",
 		"dependsOn": ["app/views/AccessibilityAndAppearanceView/**", "app/views/ThemeView.tsx"]
 	},
 	{
-		"test": ".maestro/tests/keyboardNavigation/keyboard-navigation-onboarding.yaml",
+		"test": "e2e/tests/keyboardNavigation/keyboard-navigation-onboarding.e2e.ts",
 		"dependsOn": ["app/views/NewServerView/**", "app/views/LoginView/**", "app/sagas/login.js"]
 	},
 	{
-		"test": ".maestro/tests/keyboardNavigation/keyboard-navigation-room.yaml",
+		"test": "e2e/tests/keyboardNavigation/keyboard-navigation-room.e2e.ts",
 		"dependsOn": ["app/views/RoomView/**", "app/sagas/room.js"]
 	},
 	{
-		"test": ".maestro/tests/onboarding/change-password.yaml",
+		"test": "e2e/tests/onboarding/change-password.e2e.ts",
 		"dependsOn": ["app/views/RoomsListView/**", "app/views/ChangePasswordView/**", "app/sagas/login.js", "app/sagas/rooms.js"]
 	},
 	{
-		"test": ".maestro/tests/onboarding/forgot-password.yaml",
+		"test": "e2e/tests/onboarding/forgot-password.e2e.ts",
 		"dependsOn": ["app/views/ForgotPasswordView.tsx", "app/views/LoginView/**", "app/sagas/login.js"]
 	},
 	{
-		"test": ".maestro/tests/onboarding/legal.yaml",
+		"test": "e2e/tests/onboarding/legal.e2e.ts",
 		"dependsOn": ["app/views/LegalView.tsx", "app/views/LoginView/**", "app/views/RegisterView/**", "app/sagas/login.js"]
 	},
 	{
-		"test": ".maestro/tests/onboarding/login/invalid-credentials.yaml",
+		"test": "e2e/tests/onboarding/login/cas-login.e2e.ts",
+		"dependsOn": [
+			"app/views/LoginView/**",
+			"app/views/AuthenticationWebView.tsx",
+			"app/containers/LoginServices/**",
+			"app/sagas/login.js",
+			"app/sagas/deepLinking.js",
+			"app/lib/methods/helpers/parseSamlOrCasRedirect.ts",
+			"app/lib/methods/helpers/parseDeepLinking.ts"
+		]
+	},
+	{
+		"test": "e2e/tests/onboarding/login/invalid-credentials.e2e.ts",
 		"dependsOn": ["app/views/LoginView/**", "app/sagas/login.js"]
 	},
 	{
-		"test": ".maestro/tests/onboarding/login/login.yaml",
+		"test": "e2e/tests/onboarding/login/login.e2e.ts",
 		"dependsOn": ["app/views/LoginView/**", "app/sagas/login.js"]
 	},
 	{
-		"test": ".maestro/tests/onboarding/register/create-account.yaml",
+		"test": "e2e/tests/onboarding/login/saml-login.e2e.ts",
+		"dependsOn": [
+			"app/views/LoginView/**",
+			"app/views/AuthenticationWebView.tsx",
+			"app/containers/LoginServices/**",
+			"app/sagas/login.js",
+			"app/sagas/deepLinking.js",
+			"app/lib/methods/helpers/parseSamlOrCasRedirect.ts",
+			"app/lib/methods/helpers/parseDeepLinking.ts"
+		]
+	},
+	{
+		"test": "e2e/tests/onboarding/register/create-account.e2e.ts",
 		"dependsOn": ["app/views/RegisterView/**", "app/sagas/login.js"]
 	},
 	{
-		"test": ".maestro/tests/onboarding/register/email-used.yaml",
+		"test": "e2e/tests/onboarding/register/email-used.e2e.ts",
 		"dependsOn": ["app/views/RegisterView/**", "app/sagas/login.js"]
 	},
 	{
-		"test": ".maestro/tests/onboarding/register/username-used.yaml",
+		"test": "e2e/tests/onboarding/register/username-used.e2e.ts",
 		"dependsOn": ["app/views/RegisterView/**", "app/sagas/login.js"]
 	},
 	{
-		"test": ".maestro/tests/onboarding/roomslist.yaml",
+		"test": "e2e/tests/onboarding/roomslist.e2e.ts",
 		"dependsOn": ["app/views/RoomsListView/**", "app/sagas/login.js", "app/sagas/rooms.js"]
 	},
 	{
-		"test": ".maestro/tests/onboarding/server-history.yaml",
+		"test": "e2e/tests/onboarding/server-history.e2e.ts",
 		"dependsOn": ["app/views/NewServerView/**", "app/sagas/login.js"]
 	},
 	{
-		"test": ".maestro/tests/onboarding/servers-history-small-screen.yaml",
+		"test": "e2e/tests/onboarding/servers-history-small-screen.e2e.ts",
 		"dependsOn": ["app/views/NewServerView/**", "app/sagas/login.js"]
 	},
 	{
-		"test": ".maestro/tests/onboarding/workspace/invalid-workspace.yaml",
+		"test": "e2e/tests/onboarding/workspace/invalid-workspace.e2e.ts",
 		"dependsOn": ["app/views/NewServerView/**", "app/sagas/login.js"]
 	},
 	{
-		"test": ".maestro/tests/onboarding/workspace/valid-workspace.yaml",
+		"test": "e2e/tests/onboarding/workspace/valid-workspace.e2e.ts",
 		"dependsOn": ["app/views/NewServerView/**", "app/sagas/login.js"]
 	},
 	{
-		"test": ".maestro/tests/room/create-dm-group.yaml",
+		"test": "e2e/tests/room/create-dm-group.e2e.ts",
 		"dependsOn": [
 			"app/views/NewMessageView/**",
 			"app/views/SelectedUsersView/**",
@@ -199,7 +261,7 @@
 		]
 	},
 	{
-		"test": ".maestro/tests/room/create-room.yaml",
+		"test": "e2e/tests/room/create-room.e2e.ts",
 		"dependsOn": [
 			"app/views/NewMessageView/**",
 			"app/views/SelectedUsersView/**",
@@ -209,7 +271,7 @@
 		]
 	},
 	{
-		"test": ".maestro/tests/room/discussion.yaml",
+		"test": "e2e/tests/room/discussion.e2e.ts",
 		"dependsOn": [
 			"app/views/NewMessageView/**",
 			"app/views/SelectedUsersView/**",
@@ -222,11 +284,11 @@
 		]
 	},
 	{
-		"test": ".maestro/tests/room/ignoreuser.yaml",
+		"test": "e2e/tests/room/ignoreuser.e2e.ts",
 		"dependsOn": ["app/views/RoomInfoView/**", "app/views/ReportUserView/**", "app/views/RoomActionsView/**", "app/sagas/room.js"]
 	},
 	{
-		"test": ".maestro/tests/room/jump-to-message.yaml",
+		"test": "e2e/tests/room/jump-to-message.e2e.ts",
 		"dependsOn": [
 			"app/views/RoomView/**",
 			"app/views/SearchMessagesView/**",
@@ -235,15 +297,40 @@
 		]
 	},
 	{
-		"test": ".maestro/tests/room/mark-as-unread.yaml",
+		"test": "e2e/tests/room/mark-as-unread.e2e.ts",
 		"dependsOn": ["app/views/RoomsListView/**", "app/containers/MessageActions/**", "app/sagas/rooms.js"]
 	},
 	{
-		"test": ".maestro/tests/room/message-markdown-click.yaml",
+		"test": "e2e/tests/room/messages-received-while-offline.e2e.ts",
+		"dependsOn": [
+			"app/lib/services/sdk.ts",
+			"app/lib/services/socketHealth.ts",
+			"app/lib/methods/loadMissedMessages.ts",
+			"app/lib/methods/subscriptions/room.ts",
+			"app/lib/methods/subscribeRooms.ts",
+			"app/sagas/rooms.js",
+			"app/views/RoomView/**"
+		]
+	},
+	{
+		"test": "e2e/tests/room/send-message-while-offline.e2e.ts",
+		"dependsOn": [
+			"app/views/RoomView/**",
+			"app/containers/message/components/RightIcons/MessageError.tsx",
+			"app/lib/methods/sendMessage.ts",
+			"app/sagas/messages.js"
+		]
+	},
+	{
+		"test": "e2e/tests/room/message-markdown-click.e2e.ts",
 		"dependsOn": ["app/views/RoomView/**", "app/containers/markdown/**", "app/sagas/room.js"]
 	},
 	{
-		"test": ".maestro/tests/room/quote-thread-message.yaml",
+		"test": "e2e/tests/room/reaction-list-scroll-to-last-user.e2e.ts",
+		"dependsOn": ["app/containers/ReactionsList/**", "app/containers/ActionSheet/**"]
+	},
+	{
+		"test": "e2e/tests/room/quote-thread-message.e2e.ts",
 		"dependsOn": [
 			"app/views/RoomView/**",
 			"app/containers/MessageComposer/**",
@@ -252,11 +339,21 @@
 		]
 	},
 	{
-		"test": ".maestro/tests/room/reaction-picker-small-screen.yaml",
+		"test": "e2e/tests/room/attachment-send.e2e.ts",
+		"dependsOn": [
+			"app/views/RoomView/**",
+			"app/containers/MessageComposer/**",
+			"app/lib/methods/helpers/ImagePicker/**",
+			"app/lib/methods/sendFileMessage/**",
+			"app/lib/hooks/useAltTextSupported.ts"
+		]
+	},
+	{
+		"test": "e2e/tests/room/reaction-picker-small-screen.e2e.ts",
 		"dependsOn": ["app/containers/EmojiPicker/**", "app/containers/ReactionsList/**"]
 	},
 	{
-		"test": ".maestro/tests/room/room-actions.yaml",
+		"test": "e2e/tests/room/room-actions.e2e.ts",
 		"dependsOn": [
 			"app/views/RoomActionsView/**",
 			"app/views/RoomMembersView/**",
@@ -267,46 +364,59 @@
 		]
 	},
 	{
-		"test": ".maestro/tests/room/room-info.yaml",
+		"test": "e2e/tests/room/room-info.e2e.ts",
 		"dependsOn": ["app/views/RoomInfoView/**", "app/views/RoomInfoEditView/**"]
 	},
 	{
-		"test": ".maestro/tests/room/room-last-message-thread-50-plus.yaml",
+		"test": "e2e/tests/room/room-last-message-thread-50-plus.e2e.ts",
 		"dependsOn": ["app/views/RoomView/**", "app/sagas/room.js"]
 	},
 	{
-		"test": ".maestro/tests/room/room.yaml",
+		"test": "e2e/tests/room/room.e2e.ts",
 		"dependsOn": ["app/views/RoomView/**", "app/views/RoomInfoView/**", "app/sagas/room.js", "app/sagas/messages.js"]
 	},
 	{
-		"test": ".maestro/tests/room/search-member.yaml",
+		"test": "e2e/tests/room/search-member.e2e.ts",
 		"dependsOn": ["app/views/RoomMembersView/**"]
 	},
 	{
-		"test": ".maestro/tests/room/search.yaml",
+		"test": "e2e/tests/room/search.e2e.ts",
 		"dependsOn": ["app/views/RoomsListView/**", "app/sagas/rooms.js"]
 	},
 	{
-		"test": ".maestro/tests/room/servers-list-small-screen.yaml",
+		"test": "e2e/tests/room/servers-list-small-screen.e2e.ts",
 		"dependsOn": ["app/views/NewServerView/**", "app/views/RoomsListView/**", "app/sagas/login.js", "app/sagas/rooms.js"]
 	},
 	{
-		"test": ".maestro/tests/room/share-message.yaml",
+		"test": "e2e/tests/room/share-message.e2e.ts",
 		"dependsOn": ["app/views/ForwardMessageView/**", "app/containers/MessageActions/**"]
 	},
 	{
-		"test": ".maestro/tests/room/threads.yaml",
+		"test": "e2e/tests/room/threads.e2e.ts",
 		"dependsOn": ["app/views/RoomView/**", "app/views/ThreadMessagesView/**", "app/sagas/room.js"]
 	},
 	{
-		"test": ".maestro/tests/room/unread-badge.yaml",
+		"test": "e2e/tests/room/unread-badge.e2e.ts",
 		"dependsOn": ["app/views/RoomsListView/**", "app/sagas/rooms.js"]
 	},
 	{
-		"test": ".maestro/tests/teams/convert-team.yaml",
+		"test": "e2e/tests/share-extension/share-extension-deeplink.e2e.ts",
+		"dependsOn": [
+			"app/views/ShareListView/**",
+			"app/views/ShareView/**",
+			"app/views/SelectServerView.tsx",
+			"app/views/NewServerView/**",
+			"app/views/RoomsListView/**",
+			"app/sagas/deepLinking.js",
+			"android/app/src/main/java/chat/rocket/reactnative/share/**",
+			"ios/ShareRocketChatRN/**"
+		]
+	},
+	{
+		"test": "e2e/tests/teams/convert-team.e2e.ts",
 		"dependsOn": [
 			"app/views/RoomActionsView/**",
-			"app/views/SelectListView.tsx",
+			"app/views/SelectListView/**",
 			"app/views/CreateChannelView/**",
 			"app/views/NewMessageView/**",
 			"app/views/SelectedUsersView/**",
@@ -315,7 +425,7 @@
 		]
 	},
 	{
-		"test": ".maestro/tests/teams/create-team.yaml",
+		"test": "e2e/tests/teams/create-team.e2e.ts",
 		"dependsOn": [
 			"app/views/NewMessageView/**",
 			"app/views/SelectedUsersView/**",
@@ -328,7 +438,7 @@
 		]
 	},
 	{
-		"test": ".maestro/tests/teams/team.yaml",
+		"test": "e2e/tests/teams/team.e2e.ts",
 		"dependsOn": [
 			"app/views/RoomActionsView/**",
 			"app/views/TeamChannelsView.tsx",
@@ -336,10 +446,34 @@
 			"app/views/AddExistingChannelView/**",
 			"app/views/RoomMembersView/**",
 			"app/views/SelectedUsersView/**",
-			"app/views/SelectListView.tsx",
+			"app/views/SelectListView/**",
 			"app/views/CreateChannelView/**",
 			"app/sagas/room.js",
 			"app/sagas/createChannel.js"
+		]
+	},
+	{
+		"test": "e2e/tests/uikit/button-kit.e2e.ts",
+		"dependsOn": [
+			"app/containers/UIKit/**",
+			"app/lib/apps/**",
+			"app/lib/services/appsApiFetch.ts",
+			"app/views/RoomView/services/blockAction.ts",
+			"app/lib/methods/subscriptions/rooms.ts"
+		]
+	},
+	{
+		"test": "e2e/tests/uikit/poll.e2e.ts",
+		"dependsOn": [
+			"app/containers/UIKit/**",
+			"app/lib/apps/**",
+			"app/containers/MessageComposer/**",
+			"app/views/ModalBlockView.tsx",
+			"app/views/RoomView/services/blockAction.ts",
+			"app/lib/services/appsApiFetch.ts",
+			"app/lib/services/connect.ts",
+			"app/sagas/login.js",
+			"app/lib/methods/subscriptions/rooms.ts"
 		]
 	}
 ]

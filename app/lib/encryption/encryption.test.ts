@@ -1,6 +1,7 @@
 // Bypass the global mock of `app/lib/encryption` declared in jest.setup.js by
 // importing directly from the file. We exercise the real `encryptMessage` here.
 import encryption from './encryption';
+import database from '../database';
 
 jest.unmock('./encryption');
 
@@ -48,16 +49,46 @@ jest.mock('../store/auxStore', () => ({
 }));
 
 const mockSubFind = jest.fn();
-jest.mock('../database', () => ({
-	__esModule: true,
-	default: {
-		active: {
-			get: () => ({ find: (rid: string) => mockSubFind(rid) })
+// Rows returned by `collection.query(...).fetch()`, keyed by collection name.
+const mockQueryRows: Record<string, unknown[]> = {};
+const mockDbBatch = jest.fn((...args: any[]) => {
+	// db.batch commits prepared records, clearing their pending state (like the real writer).
+	args.flat().forEach((item: any) => {
+		if (item && typeof item === 'object' && '_preparedState' in item) {
+			item._preparedState = null;
 		}
-	}
+	});
+	return Promise.resolve(undefined);
+});
+jest.mock('../database', () => {
+	let writerQueue: Promise<unknown> = Promise.resolve();
+	return {
+		__esModule: true,
+		default: {
+			active: {
+				get: (name: string) => ({
+					find: (rid: string) => mockSubFind(rid),
+					query: () => ({ fetch: () => Promise.resolve(mockQueryRows[name] ?? []) })
+				}),
+				// Serialized writer lock, like WatermelonDB's.
+				write: (callback: () => Promise<void>) => {
+					const run = writerQueue.then(() => callback());
+					writerQueue = run.catch(() => undefined);
+					return run;
+				},
+				batch: (...args: unknown[]) => mockDbBatch(...args)
+			}
+		}
+	};
+});
+
+const mockGetSubscriptionByRoomId = jest.fn();
+jest.mock('../database/services/Subscription', () => ({
+	getSubscriptionByRoomId: (rid: string) => mockGetSubscriptionByRoomId(rid)
 }));
 
 const mockRoomEncrypt = jest.fn();
+const mockRoomEncryptFile = jest.fn();
 const mockHasSessionKey = jest.fn();
 const mockHandshake = jest.fn().mockResolvedValue(undefined);
 jest.mock('./room', () => ({
@@ -65,7 +96,8 @@ jest.mock('./room', () => ({
 	default: jest.fn().mockImplementation(() => ({
 		handshake: mockHandshake,
 		hasSessionKey: () => mockHasSessionKey(),
-		encrypt: (m: any) => mockRoomEncrypt(m)
+		encrypt: (m: any) => mockRoomEncrypt(m),
+		encryptFile: (rid: string, file: any) => mockRoomEncryptFile(rid, file)
 	}))
 }));
 
@@ -139,5 +171,254 @@ describe('Encryption.encryptMessage', () => {
 
 		expect(result).toBe(baseMessage);
 		expect(mockRoomEncrypt).not.toHaveBeenCalled();
+	});
+});
+
+describe('Encryption.encryptFile', () => {
+	const file = { rid: 'r1', name: 'photo.jpg', path: '/tmp/photo.jpg', size: 1, type: 'image/jpeg' } as any;
+
+	beforeEach(() => {
+		jest.clearAllMocks();
+		mockHandshake.mockResolvedValue(undefined);
+		(encryption as any).roomInstances = {};
+	});
+
+	it('uploads the plain file when the room is not encrypted', async () => {
+		mockGetState.mockReturnValue({ settings: { E2E_Enable: true } });
+		mockGetSubscriptionByRoomId.mockResolvedValue({ encrypted: false });
+
+		await expect(encryption.encryptFile('r1', file)).resolves.toEqual({ file });
+	});
+
+	it('uploads the plain file when workspace E2E is disabled, even if the local subscription is flagged as encrypted', async () => {
+		mockGetState.mockReturnValue({ settings: { E2E_Enable: false } });
+		mockGetSubscriptionByRoomId.mockResolvedValue({ encrypted: true });
+
+		await expect(encryption.encryptFile('r1', file)).resolves.toEqual({ file });
+		expect(mockRoomEncryptFile).not.toHaveBeenCalled();
+	});
+
+	it('throws instead of uploading the plain file when the room is encrypted but no session key is available', async () => {
+		mockGetState.mockReturnValue({ settings: { E2E_Enable: true } });
+		mockGetSubscriptionByRoomId.mockResolvedValue({ encrypted: true });
+		mockHasSessionKey.mockReturnValue(false);
+
+		await expect(encryption.encryptFile('r1', file)).rejects.toThrow('Room encryption key is not available');
+		expect(mockRoomEncryptFile).not.toHaveBeenCalled();
+	});
+
+	it('does not upload the plain file while workspace settings are still loading', async () => {
+		mockGetState.mockReturnValue({ settings: {} });
+		mockGetSubscriptionByRoomId.mockResolvedValue({ encrypted: true });
+		mockHasSessionKey.mockReturnValue(false);
+
+		await expect(encryption.encryptFile('r1', file)).rejects.toThrow('Room encryption key is not available');
+	});
+
+	it('encrypts the file when the room is encrypted and a session key is available', async () => {
+		mockGetState.mockReturnValue({ settings: { E2E_Enable: true } });
+		mockGetSubscriptionByRoomId.mockResolvedValue({ encrypted: true });
+		mockHasSessionKey.mockReturnValue(true);
+		const encrypted = { file: { ...file, path: '/tmp/encrypted' } };
+		mockRoomEncryptFile.mockResolvedValue(encrypted);
+
+		await expect(encryption.encryptFile('r1', file)).resolves.toBe(encrypted);
+		expect(mockRoomEncryptFile).toHaveBeenCalledWith('r1', file);
+	});
+});
+
+describe('Encryption.canSendToRoom', () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+		mockHandshake.mockResolvedValue(undefined);
+		(encryption as any).roomInstances = {};
+		(encryption as any).readyPromise = Promise.resolve();
+	});
+
+	it('allows rooms that are not encrypted', async () => {
+		mockGetState.mockReturnValue({ settings: { E2E_Enable: true }, encryption: { enabled: false, banner: '' } });
+		mockGetSubscriptionByRoomId.mockResolvedValue({ encrypted: false });
+
+		await expect(encryption.canSendToRoom('r1')).resolves.toBe(true);
+	});
+
+	it('blocks rooms without a subscription', async () => {
+		mockGetState.mockReturnValue({ settings: { E2E_Enable: true }, encryption: { enabled: true, banner: '' } });
+		mockGetSubscriptionByRoomId.mockResolvedValue(null);
+
+		await expect(encryption.canSendToRoom('r1')).resolves.toBe(false);
+		expect(mockHandshake).not.toHaveBeenCalled();
+	});
+
+	it('allows encrypted rooms when workspace E2E is disabled', async () => {
+		mockGetState.mockReturnValue({ settings: { E2E_Enable: false }, encryption: { enabled: false, banner: '' } });
+		mockGetSubscriptionByRoomId.mockResolvedValue({ encrypted: true });
+
+		await expect(encryption.canSendToRoom('r1')).resolves.toBe(true);
+	});
+
+	it('blocks encrypted rooms while the E2EE password has not been entered', async () => {
+		mockGetState.mockReturnValue({ settings: { E2E_Enable: true }, encryption: { enabled: false, banner: 'REQUEST_PASSWORD' } });
+		mockGetSubscriptionByRoomId.mockResolvedValue({ encrypted: true });
+
+		await expect(encryption.canSendToRoom('r1')).resolves.toBe(false);
+		expect(mockHandshake).not.toHaveBeenCalled();
+	});
+
+	it('blocks encrypted rooms without a session key', async () => {
+		mockGetState.mockReturnValue({ settings: { E2E_Enable: true }, encryption: { enabled: true, banner: '' } });
+		mockGetSubscriptionByRoomId.mockResolvedValue({ encrypted: true });
+		mockHasSessionKey.mockReturnValue(false);
+
+		await expect(encryption.canSendToRoom('r1')).resolves.toBe(false);
+	});
+
+	it('blocks encrypted rooms without a session key while workspace settings are still loading', async () => {
+		mockGetState.mockReturnValue({ settings: {}, encryption: { enabled: true, banner: '' } });
+		mockGetSubscriptionByRoomId.mockResolvedValue({ encrypted: true });
+		mockHasSessionKey.mockReturnValue(false);
+
+		await expect(encryption.canSendToRoom('r1')).resolves.toBe(false);
+	});
+
+	it('allows encrypted rooms with a session key', async () => {
+		mockGetState.mockReturnValue({ settings: { E2E_Enable: true }, encryption: { enabled: true, banner: '' } });
+		mockGetSubscriptionByRoomId.mockResolvedValue({ encrypted: true });
+		mockHasSessionKey.mockReturnValue(true);
+
+		await expect(encryption.canSendToRoom('r1')).resolves.toBe(true);
+	});
+});
+
+// Mimics a WatermelonDB Model: prepareUpdate throws while a previous prepared
+// update has not been committed yet.
+const makeRecord = (table: string, id: string, fields: Record<string, any> = {}) => {
+	const record: any = {
+		id,
+		...fields,
+		_preparedState: null,
+		prepareUpdate(recordUpdater: (m: any) => void) {
+			if (record._preparedState) {
+				throw new Error(`Cannot update a record with pending changes (${table}#${id})`);
+			}
+			recordUpdater(record);
+			record._preparedState = 'update';
+			return record;
+		}
+	};
+	return record;
+};
+
+describe('Encryption.decryptPendingMessages', () => {
+	const rid = 'r1';
+
+	const makeMessageRecord = (id: string) => makeRecord('messages', id, { t: 'e2e', msg: 'cipher', subscription: { id: rid } });
+
+	const deferred = () => {
+		let resolve: () => void = () => undefined;
+		const promise = new Promise<void>(r => {
+			resolve = r;
+		});
+		return { promise, resolve };
+	};
+
+	beforeEach(() => {
+		jest.clearAllMocks();
+		mockQueryRows.messages = [];
+		mockQueryRows.threads = [];
+		mockQueryRows.thread_messages = [];
+	});
+
+	afterEach(() => {
+		jest.restoreAllMocks();
+	});
+
+	it('does not throw "pending changes" when a concurrent writer touches the same message mid-decrypt', async () => {
+		const record = makeMessageRecord('m1');
+		mockQueryRows.messages = [record];
+		jest.spyOn(encryption, 'decryptMessage').mockResolvedValue({ msg: 'plain', e2e: 'done' } as any);
+
+		const db = (database as any).active;
+
+		// Hold the writer lock — as a new incoming message being saved would — and then update
+		// the very record decryptPendingMessages is about to prepare.
+		const concurrentGate = deferred();
+		const concurrentWrite = db.write(async () => {
+			await concurrentGate.promise;
+			await db.batch([
+				record.prepareUpdate((m: any) => {
+					m.msg = 'written by another writer';
+				})
+			]);
+		});
+
+		const decrypting = encryption.decryptPendingMessages(rid);
+
+		// Give an unlocked implementation the chance to prepare now — before the concurrent
+		// writer runs — and hold the record pending until its own batch.
+		await new Promise(resolve => setImmediate(resolve));
+		concurrentGate.resolve();
+
+		await expect(Promise.all([concurrentWrite, decrypting])).resolves.toBeDefined();
+
+		// The decrypted update reached db.batch and nothing was left prepared-but-uncommitted.
+		const committed = mockDbBatch.mock.calls.map(call => call.flat()).some(items => items.includes(record));
+		expect(committed).toBe(true);
+		expect(record.msg).toBe('plain');
+		expect(record.e2e).toBe('done');
+		expect(record._preparedState).toBeNull();
+	});
+
+	it('skips a record whose prepareUpdate throws and still commits the others', async () => {
+		const failing = makeMessageRecord('m1');
+		// Already prepared by someone else, so prepareUpdate throws for this one.
+		failing._preparedState = 'update';
+		const healthy = makeMessageRecord('m2');
+		mockQueryRows.messages = [failing, healthy];
+		jest.spyOn(encryption, 'decryptMessage').mockResolvedValue({ msg: 'plain', e2e: 'done' } as any);
+
+		await encryption.decryptPendingMessages(rid);
+
+		const batched = mockDbBatch.mock.calls.flatMap(call => call.flat());
+		expect(batched).toContain(healthy);
+		expect(batched).not.toContain(failing);
+		expect(healthy.msg).toBe('plain');
+		expect(failing.msg).toBe('cipher');
+	});
+});
+
+describe('Encryption.decryptPendingSubscriptions', () => {
+	const makeSubscriptionRecord = (id: string) =>
+		makeRecord('subscriptions', id, { lastMessage: { t: 'e2e', e2e: 'pending', msg: 'cipher' } });
+
+	beforeEach(() => {
+		jest.clearAllMocks();
+		mockQueryRows.subscriptions = [];
+	});
+
+	afterEach(() => {
+		jest.restoreAllMocks();
+	});
+
+	it('leaves no subscription prepared-but-uncommitted when one decryption rejects', async () => {
+		const healthy = makeSubscriptionRecord('s1');
+		const failing = makeSubscriptionRecord('s2');
+		mockQueryRows.subscriptions = [healthy, failing];
+		jest.spyOn(encryption, 'decryptSubscription').mockImplementation((sub: any) => {
+			if (sub.id === failing.id) {
+				return Promise.reject(new Error('decrypt failed'));
+			}
+			return Promise.resolve({ lastMessage: { t: 'e2e', e2e: 'done', msg: 'plain' } } as any);
+		});
+
+		await encryption.decryptPendingSubscriptions();
+
+		expect(healthy._preparedState).toBeNull();
+		expect(failing._preparedState).toBeNull();
+
+		const batched = mockDbBatch.mock.calls.flatMap(call => call.flat());
+		expect(batched).toContain(healthy);
+		expect(healthy.lastMessage).toEqual({ t: 'e2e', e2e: 'done', msg: 'plain' });
+		expect(failing.lastMessage).toEqual({ t: 'e2e', e2e: 'pending', msg: 'cipher' });
 	});
 });

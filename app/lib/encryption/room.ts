@@ -23,7 +23,7 @@ import type {
 	IServerAttachment,
 	TSubscriptionModel,
 	ISubscription
-} from '../../definitions';
+} from '~/definitions';
 import Deferred from './helpers/deferred';
 import { compareServerVersion, debounce } from '../methods/helpers';
 import log from '../methods/helpers/log';
@@ -45,7 +45,6 @@ import {
 	decodePrefixedBase64,
 	encodePrefixedBase64
 } from './utils';
-import { Encryption } from './index';
 import { E2E_MESSAGE_TYPE, E2E_STATUS } from '../constants/keys';
 import {
 	e2eRejectSuggestedGroupKey,
@@ -62,7 +61,7 @@ import { mapMessageFromDB } from './helpers/mapMessageFromDB';
 import { createQuoteAttachment } from './helpers/createQuoteAttachment';
 import { getSubscriptionByRoomId } from '../database/services/Subscription';
 import { getMessageById } from '../database/services/Message';
-import { type TEncryptFileResult, type TGetContent } from './definitions';
+import { type IEncryption, type TEncryptFileResult, type TGetContent } from './definitions';
 import { store } from '../store/auxStore';
 
 type TAlgorithm = 'A128CBC' | 'A256GCM' | '';
@@ -78,25 +77,39 @@ export default class EncryptionRoom {
 	algorithm: TAlgorithm;
 	roomKey: ArrayBuffer;
 	subscription: TSubscriptionModel | null;
+	encryption: IEncryption;
 
-	constructor(roomId: string, userId: string) {
+	constructor(roomId: string, userId: string, encryption: IEncryption) {
 		this.ready = false;
 		this.roomId = roomId;
 		this.userId = userId;
+		this.encryption = encryption;
 		this.establishing = false;
 		this.keyID = '';
 		this.algorithm = '';
 		this.sessionKeyExportedString = '';
 		this.roomKey = new ArrayBuffer(0);
-		this.readyPromise = new Deferred();
-		this.readyPromise.then(() => {
-			// Mark as ready
-			this.ready = true;
-			// Mark as established
-			this.establishing = false;
-		});
+		this.readyPromise = this.createReadyPromise();
 		this.subscription = null;
 	}
+
+	createReadyPromise = () => {
+		const readyPromise = new Deferred();
+		readyPromise.then(
+			() => {
+				this.ready = true;
+				this.establishing = false;
+			},
+			() => {}
+		);
+		return readyPromise;
+	};
+
+	failHandshake = () => {
+		this.establishing = false;
+		this.readyPromise.reject();
+		this.readyPromise = this.createReadyPromise();
+	};
 
 	// Initialize the E2E room
 	handshake = async () => {
@@ -124,19 +137,19 @@ export default class EncryptionRoom {
 		}
 
 		// Check if we have the user's private key to decrypt room keys
-		if (!Encryption.privateKey) {
+		if (!this.encryption.privateKey) {
 			// User hasn't entered E2E password yet
 			// Room will remain not ready until password is entered
 			return;
 		}
 
 		const { E2EKey, e2eKeyId, E2ESuggestedKey } = this.subscription;
+		this.establishing = true;
 		if (E2ESuggestedKey) {
 			try {
-				this.establishing = true;
 				const { keyID, roomKey, sessionKeyExportedString, algorithm } = await this.importRoomKey(
 					E2ESuggestedKey,
-					Encryption.privateKey
+					this.encryption.privateKey
 				);
 				this.keyID = keyID;
 				this.roomKey = roomKey;
@@ -144,7 +157,8 @@ export default class EncryptionRoom {
 				this.algorithm = algorithm;
 				try {
 					await e2eAcceptSuggestedGroupKey(this.roomId);
-					Encryption.deleteRoomInstance(this.roomId);
+					this.readyPromise.resolve();
+					this.encryption.deleteRoomInstance(this.roomId);
 					return;
 				} catch (error) {
 					await e2eRejectSuggestedGroupKey(this.roomId);
@@ -157,8 +171,10 @@ export default class EncryptionRoom {
 		// If this room has a E2EKey, we import it
 		if (E2EKey) {
 			try {
-				this.establishing = true;
-				const { keyID, roomKey, sessionKeyExportedString, algorithm } = await this.importRoomKey(E2EKey, Encryption.privateKey);
+				const { keyID, roomKey, sessionKeyExportedString, algorithm } = await this.importRoomKey(
+					E2EKey,
+					this.encryption.privateKey
+				);
 				this.keyID = keyID;
 				this.roomKey = roomKey;
 				this.sessionKeyExportedString = sessionKeyExportedString;
@@ -166,7 +182,6 @@ export default class EncryptionRoom {
 				this.readyPromise.resolve();
 				return;
 			} catch (error) {
-				this.establishing = false;
 				log(error);
 				// Fall through to try other options
 			}
@@ -175,12 +190,11 @@ export default class EncryptionRoom {
 		// If it doesn't have a e2eKeyId, we need to create keys to the room
 		if (!e2eKeyId) {
 			try {
-				this.establishing = true;
 				await this.createRoomKey();
-				Encryption.deleteRoomInstance(this.roomId);
+				this.readyPromise.resolve();
+				this.encryption.deleteRoomInstance(this.roomId);
 				return;
 			} catch (error) {
-				this.establishing = false;
 				log(error);
 				// Cannot create room key, room will remain not ready
 			}
@@ -190,6 +204,7 @@ export default class EncryptionRoom {
 		// Room will remain not ready until the key is received via subscription update
 		// When E2EKey arrives, next handshake() call will succeed
 		this.requestRoomKey(e2eKeyId);
+		this.failHandshake();
 	};
 
 	// Import roomKey as an AES Decrypt key
@@ -277,13 +292,13 @@ export default class EncryptionRoom {
 	};
 
 	async resetRoomKey() {
-		if (!Encryption.publicKey) {
+		if (!this.encryption.publicKey) {
 			console.log('Public key not found');
 			return;
 		}
 		try {
 			await this.createNewRoomKey();
-			const e2eNewKeys = { e2eKeyId: this.keyID, e2eKey: await this.encryptRoomKeyForUser(Encryption.publicKey) };
+			const e2eNewKeys = { e2eKeyId: this.keyID, e2eKey: await this.encryptRoomKeyForUser(this.encryption.publicKey) };
 			return e2eNewKeys;
 		} catch (error) {
 			console.error('Error resetting group key: ', error);
@@ -408,11 +423,11 @@ export default class EncryptionRoom {
 		const keys = [];
 		for await (const key of oldKeys) {
 			try {
-				if (!key.E2EKey || !Encryption.privateKey) {
+				if (!key.E2EKey || !this.encryption.privateKey) {
 					continue;
 				}
 
-				const { sessionKeyExportedString } = await this.importRoomKey(key.E2EKey, Encryption.privateKey);
+				const { sessionKeyExportedString } = await this.importRoomKey(key.E2EKey, this.encryption.privateKey);
 				keys.push({
 					...key,
 					E2EKey: sessionKeyExportedString
@@ -572,6 +587,7 @@ export default class EncryptionRoom {
 			];
 
 			const data = EJSON.stringify({
+				msg: file.msg || '',
 				attachments,
 				files,
 				file: files[0]
@@ -660,8 +676,8 @@ export default class EncryptionRoom {
 
 			if (kid !== this.keyID) {
 				const oldRoomKey = this.subscription?.oldRoomKeys?.find((key: any) => key.e2eKeyId === kid);
-				if (oldRoomKey?.E2EKey && Encryption.privateKey) {
-					const { roomKey, algorithm } = await this.importRoomKey(oldRoomKey.E2EKey, Encryption.privateKey);
+				if (oldRoomKey?.E2EKey && this.encryption.privateKey) {
+					const { roomKey, algorithm } = await this.importRoomKey(oldRoomKey.E2EKey, this.encryption.privateKey);
 					return this.doDecrypt(ciphertext, roomKey, iv, algorithm);
 				}
 				return null;

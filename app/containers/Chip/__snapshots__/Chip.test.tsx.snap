@@ -178,7 +178,7 @@ exports[`Story Snapshots: ChipText should match snapshot 1`] = `
         style={
           [
             {
-              "borderRadius": 4,
+              "borderRadius": 8,
               "height": 28,
               "width": 28,
             },
@@ -191,7 +191,7 @@ exports[`Story Snapshots: ChipText should match snapshot 1`] = `
         testID="avatar"
       >
         <ViewManagerAdapter_ExpoImage
-          borderRadius={4}
+          borderRadius={8}
           containerViewRef={{"current":"Object"}}
           contentFit="cover"
           contentPosition={
@@ -208,21 +208,26 @@ exports[`Story Snapshots: ChipText should match snapshot 1`] = `
           onProgress={[Function]}
           placeholder={[]}
           priority="high"
+          sfEffect={null}
           source={
             [
               {
-                "headers": undefined,
+                "headers": {
+                  "User-Agent": "RC Mobile; ios unknown; vunknown (unknown)",
+                },
                 "uri": "https://open.rocket.chat/avatar/rocket.cat?format=png&size=56",
               },
             ]
           }
           style={
             {
-              "borderRadius": 4,
+              "borderRadius": 8,
               "height": 28,
               "width": 28,
             }
           }
+          symbolSize={null}
+          symbolWeight={null}
           transition={null}
           width={28}
         />
@@ -364,7 +369,7 @@ exports[`Story Snapshots: ChipWithShortText should match snapshot 1`] = `
         style={
           [
             {
-              "borderRadius": 4,
+              "borderRadius": 8,
               "height": 28,
               "width": 28,
             },
@@ -377,7 +382,7 @@ exports[`Story Snapshots: ChipWithShortText should match snapshot 1`] = `
         testID="avatar"
       >
         <ViewManagerAdapter_ExpoImage
-          borderRadius={4}
+          borderRadius={8}
           containerViewRef={{"current":"Object"}}
           contentFit="cover"
           contentPosition={
@@ -394,21 +399,26 @@ exports[`Story Snapshots: ChipWithShortText should match snapshot 1`] = `
           onProgress={[Function]}
           placeholder={[]}
           priority="high"
+          sfEffect={null}
           source={
             [
               {
-                "headers": undefined,
+                "headers": {
+                  "User-Agent": "RC Mobile; ios unknown; vunknown (unknown)",
+                },
                 "uri": "https://open.rocket.chat/avatar/rocket.cat?format=png&size=56",
               },
             ]
           }
           style={
             {
-              "borderRadius": 4,
+              "borderRadius": 8,
               "height": 28,
               "width": 28,
             }
           }
+          symbolSize={null}
+          symbolWeight={null}
           transition={null}
           width={28}
         />
@@ -786,7 +796,7 @@ exports[`Story Snapshots: ChipWithoutIcon should match snapshot 1`] = `
         style={
           [
             {
-              "borderRadius": 4,
+              "borderRadius": 8,
               "height": 28,
               "width": 28,
             },
@@ -799,7 +809,7 @@ exports[`Story Snapshots: ChipWithoutIcon should match snapshot 1`] = `
         testID="avatar"
       >
         <ViewManagerAdapter_ExpoImage
-          borderRadius={4}
+          borderRadius={8}
           containerViewRef={{"current":"Object"}}
           contentFit="cover"
           contentPosition={
@@ -816,21 +826,26 @@ exports[`Story Snapshots: ChipWithoutIcon should match snapshot 1`] = `
           onProgress={[Function]}
           placeholder={[]}
           priority="high"
+          sfEffect={null}
           source={
             [
               {
-                "headers": undefined,
+                "headers": {
+                  "User-Agent": "RC Mobile; ios unknown; vunknown (unknown)",
+                },
                 "uri": "https://open.rocket.chat/avatar/rocket.cat?format=png&size=56",
               },
             ]
           }
           style={
             {
-              "borderRadius": 4,
+              "borderRadius": 8,
               "height": 28,
               "width": 28,
             }
           }
+          symbolSize={null}
+          symbolWeight={null}
           transition={null}
           width={28}
         />

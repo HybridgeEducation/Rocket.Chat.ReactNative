@@ -8,13 +8,13 @@ import Animated, {
 	useSharedValue,
 	type SharedValue
 } from 'react-native-reanimated';
-import { RectButton } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 import { scheduleOnRN } from 'react-native-worklets';
 
-import { CustomIcon } from '../../CustomIcon';
-import { useTheme } from '../../../theme';
-import I18n from '../../../i18n';
+import { RectButton } from '~/containers/GestureButtons';
+import { CustomIcon } from '~/containers/CustomIcon';
+import { useTheme } from '~/theme';
+import I18n from '~/i18n';
 
 export interface IDeleteActionProps {
 	transX: SharedValue<number>;
